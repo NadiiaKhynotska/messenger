@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+/messenger-api-db
+/messenger-api-s3-data
+
 # Logs
 logs
 *.log

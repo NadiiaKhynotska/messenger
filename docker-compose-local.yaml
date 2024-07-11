@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  messenger-postgres:
+    image: postgres:16.1
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    environment:
+      POSTGRES_USER: '${POSTGRES_USER:-user}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-password}'
+      POSTGRES_DB: '${POSTGRES_DB:-messenger-khynotska}'
+    volumes:
+      - ./messenger-api-db:/var/lib/postgresql/data
+
+  messenger-redis:
+    image: redis:7.2.3
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    command: >
+      --requirepass '${REDIS_PASSWORD:-redispass}'
+    restart: unless-stopped
+
+  messenger-s3:
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    ports:
+      - "7002:9000"
+      - "7001:9001"
+    volumes:
+      - ./messenger-api-s3-data:/usr/src/app/s3
+    environment:
+      - MINIO_ROOT_USER=khynotskauser
+      - MINIO_ROOT_PASSWORD=khynotskapassword
+
+volumes:
+  messenger-api-db:
+  messenger-api-s3-data:
