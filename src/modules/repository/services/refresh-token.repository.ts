@@ -11,12 +11,10 @@ export class RefreshTokenRepository extends Repository<RefreshTokenEntity> {
 
   public async saveToken(
     userId: string,
-    deviceId: string,
     token: string,
   ): Promise<RefreshTokenEntity> {
     return await this.save(
       this.create({
-        deviceId: deviceId,
         user_id: userId,
         refreshToken: token,
       }),
