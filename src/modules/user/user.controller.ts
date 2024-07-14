@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -21,15 +22,12 @@ import { UserService } from './services/user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @Get()
-  // findAll() {
-  //   return this.userService.findAll();
-  // }
-  //
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userService.findOne(+id);
-  // }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all users' })
+  @Get()
+  public async findAll() {
+    return await this.userService.findAll();
+  }
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update your own account' })

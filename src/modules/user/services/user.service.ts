@@ -9,6 +9,7 @@ import { IUserData } from '../../auth/interfaces/user-data.interface';
 import { RefreshTokenRepository } from '../../repository/services/refresh-token.repository';
 import { UserRepository } from '../../repository/services/user.repository';
 import { UpdateUserDto } from '../models/dto/request/update-user.dto';
+import { UserListResponseDto } from '../models/dto/response/user.list.response.dto';
 import { UserResponseDto } from '../models/dto/response/user.response.dto';
 import { UserMapper } from './user.mapper';
 
@@ -24,6 +25,11 @@ export class UserService {
     return UserMapper.toResponseDto(entity);
   }
 
+  public async findAll(): Promise<UserListResponseDto> {
+    const users = await this.userRepository.find();
+    return UserMapper.toResponseDtoList(users);
+  }
+
   public async updateMe(
     userData: IUserData,
     dto: UpdateUserDto,
@@ -33,10 +39,10 @@ export class UserService {
     return UserMapper.toResponseDto(entity);
   }
 
-  public async getPublicUser(userId: string): Promise<UserResponseDto> {
-    const entity = await this.userRepository.getById(userId);
-    return UserMapper.toResponseDto(entity);
-  }
+  // public async getPublicUser(userId: string): Promise<UserResponseDto> {
+  //   const entity = await this.userRepository.getById(userId);
+  //   return UserMapper.toResponseDto(entity);
+  // }
 
   private async findByIdOrThrow(userId: string): Promise<UserEntity> {
     const entity = await this.userRepository.findOneBy({ id: userId });
