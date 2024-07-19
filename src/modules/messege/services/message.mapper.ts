@@ -2,6 +2,8 @@ import * as dotenv from 'dotenv';
 
 import getConfigs from '../../../configs/config';
 import { MessageEntity } from '../../../database/entities/message.entity';
+import { MessageListRequestDto } from '../models/dto/request/message-list.request.dto';
+import { MessageListResponseDto } from '../models/dto/response/message-list.resopnse.dto';
 import { ResponseMessageDto } from '../models/dto/response/response-message.dto';
 
 dotenv.config({ path: './environments/local.env' });
@@ -25,11 +27,18 @@ export class MessageMapper {
     };
   }
 
-  // public static toResponseDtoList(
-  //   userEntity: UserEntity[],
-  // ): UserListResponseDto {
-  //   return {
-  //     data: userEntity.map(this.toResponseDto),
-  //   };
-  // }
+  public static toListResponseDto(
+    entities: MessageEntity[],
+    query: MessageListRequestDto,
+    total: number,
+  ): MessageListResponseDto {
+    return {
+      data: entities.map(this.toResponseDto),
+      meta: {
+        limit: query.limit,
+        offset: query.offset,
+        total,
+      },
+    };
+  }
 }

@@ -8,12 +8,14 @@ import {
   Param,
   ParseUUIDPipe,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { IUserData } from '../auth/interfaces/user-data.interface';
 import { UpdateUserDto } from './models/dto/request/update-user.dto';
+import { UserListRequestDto } from './models/dto/request/user-list.request.dto';
 import { UserResponseDto } from './models/dto/response/user.response.dto';
 import { UserService } from './services/user.service';
 
@@ -25,8 +27,11 @@ export class UserController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @Get()
-  public async findAll() {
-    return await this.userService.findAll();
+  public async findAll(
+    @CurrentUser() userData: IUserData,
+    @Query() query: UserListRequestDto,
+  ) {
+    return await this.userService.findAll(userData, query);
   }
 
   @ApiBearerAuth()

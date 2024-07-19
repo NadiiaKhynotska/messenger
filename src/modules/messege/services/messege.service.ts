@@ -5,7 +5,9 @@ import { MessageRepository } from '../../repository/services/message.repository'
 import { UserRepository } from '../../repository/services/user.repository';
 import { EventsGateway } from '../events/events.gateway';
 import { CreateMessageRequestDto } from '../models/dto/request/create-message.request.dto';
+import { MessageListRequestDto } from '../models/dto/request/message-list.request.dto';
 import { UpdateMessageDto } from '../models/dto/request/update-message.request.dto';
+import { MessageListResponseDto } from '../models/dto/response/message-list.resopnse.dto';
 import { ResponseMessageDto } from '../models/dto/response/response-message.dto';
 import { MessageMapper } from './message.mapper';
 import { S3Service } from './s3.service';
@@ -46,6 +48,16 @@ export class MessagesService {
     this.eventsGateway.sendMessageToUser(recipient_id, responseMessage);
     return responseMessage;
   }
+  public async findAll(
+    userData: IUserData,
+    query: MessageListRequestDto,
+  ): Promise<MessageListResponseDto> {
+    const [entities, total] = await this.messageRepository.getAllForUser(
+      userData.userId,
+      query,
+    );
+    return MessageMapper.toListResponseDto(entities, query, total);
+  }
 
   public async update(
     userData: IUserData,
@@ -65,12 +77,13 @@ export class MessagesService {
             this.s3Service.deleteFileFromS3(attachment),
           ),
         );
-        updatedAttachmentUrls = await Promise.all(
-          attachments.map((file) =>
-            this.s3Service.uploadFileToS3(file, userData.userId),
-          ),
-        );
       }
+
+      updatedAttachmentUrls = await Promise.all(
+        attachments.map((file) =>
+          this.s3Service.uploadFileToS3(file, userData.userId),
+        ),
+      );
     }
 
     await this.messageRepository.update(message_id, {
@@ -80,7 +93,12 @@ export class MessagesService {
     const updatedMessage = await this.messageRepository.findOne({
       where: { id: message_id },
     });
-    return MessageMapper.toResponseDto(updatedMessage);
+    const responseMessage = MessageMapper.toResponseDto(updatedMessage);
+    this.eventsGateway.sendUpdateToUser(
+      updatedMessage.recipient_id,
+      responseMessage,
+    );
+    return responseMessage;
   }
 
   public async deleteMessage(
@@ -102,5 +120,6 @@ export class MessagesService {
     }
 
     await this.messageRepository.delete(message_id);
+    this.eventsGateway.sendDeleteToUser(message.recipient_id, message_id);
   }
 }

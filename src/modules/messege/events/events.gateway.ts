@@ -1,50 +1,3 @@
-// import {
-//   MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit,
-//   SubscribeMessage,
-//   WebSocketGateway,
-//   WebSocketServer,
-// } from '@nestjs/websockets';
-// import { Server, Socket } from 'socket.io';
-//
-// @WebSocketGateway({
-//   cors: {
-//     origin: '*',
-//   },
-// })
-// export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-//
-//   private clients: Set<Socket> = new Set();
-//
-//   @WebSocketServer()
-//   public server: Server;
-//   afterInit(server: Server) {
-//     console.log('WebSocket Gateway initialized');
-//   }
-//
-//   handleConnection(client: Socket) {
-//     console.log(`Client connected: ${client.id}`);
-//     this.clients.add(client);
-//   }
-//
-//   handleDisconnect(client: Socket) {
-//     console.log(`Client disconnected: ${client.id}`);
-//     this.clients.delete(client);
-//   }
-//
-//   @SubscribeMessage('sendMessage')
-//   handleMessage(client: Socket, payload: any): void {
-//     console.log(`Message from client ${client.id}: ${payload}`);
-//     client.emit('reply', 'this is replay')
-//   }
-//
-//
-//   @SubscribeMessage('identity')
-//   async identity(@MessageBody() data: number): Promise<number> {
-//     return data;
-//   }
-// }
-//
-//
 import { Logger } from '@nestjs/common';
 import {
   MessageBody,
@@ -56,6 +9,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+
+import { ResponseMessageDto } from '../models/dto/response/response-message.dto';
 
 @WebSocketGateway({
   cors: {
@@ -91,11 +46,43 @@ export class EventsGateway
     }
   }
 
-  sendMessageToUser(userId: string, message: any) {
+  @SubscribeMessage('sendMessage')
+  handleMessage(client: Socket, payload: any): void {
+    Logger.log(`Message from client ${client.id}: ${payload}`);
+    const recipientSocketId = this.clients.get(payload.recipientId);
+    if (recipientSocketId) {
+      this.server.to(recipientSocketId).emit('newMessage', payload);
+      Logger.log(`Message sent to ${recipientSocketId}`);
+    } else {
+      Logger.log(`Recipient not connected: ${payload.recipientId}`);
+    }
+  }
+
+  sendMessageToUser(userId: string, message: ResponseMessageDto) {
     const recipientSocketId = this.clients.get(userId);
     if (recipientSocketId) {
       this.server.to(recipientSocketId).emit('newMessage', message);
       Logger.log(`Message sent to user ${recipientSocketId}`);
+    } else {
+      Logger.log(`Recipient not connected: ${userId}`);
+    }
+  }
+
+  sendUpdateToUser(userId: string, message: ResponseMessageDto) {
+    const recipientSocketId = this.clients.get(userId);
+    if (recipientSocketId) {
+      this.server.to(recipientSocketId).emit('updateMessage', message);
+      Logger.log(`Update sent to ${recipientSocketId}`);
+    } else {
+      Logger.log(`Recipient not connected: ${userId}`);
+    }
+  }
+
+  sendDeleteToUser(userId: string, messageId: string) {
+    const recipientSocketId = this.clients.get(userId);
+    if (recipientSocketId) {
+      this.server.to(recipientSocketId).emit('deleteMessage', messageId);
+      Logger.log(`Delete sent to ${recipientSocketId}`);
     } else {
       Logger.log(`Recipient not connected: ${userId}`);
     }

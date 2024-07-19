@@ -2,10 +2,12 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,7 +18,9 @@ import { photoConfig } from '../../constants/photo-config';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { IUserData } from '../auth/interfaces/user-data.interface';
 import { CreateMessageRequestDto } from './models/dto/request/create-message.request.dto';
+import { MessageListRequestDto } from './models/dto/request/message-list.request.dto';
 import { UpdateMessageDto } from './models/dto/request/update-message.request.dto';
+import { MessageListResponseDto } from './models/dto/response/message-list.resopnse.dto';
 import { ResponseMessageDto } from './models/dto/response/response-message.dto';
 import { MessagesService } from './services/messege.service';
 import { imageFileFilter } from './utils/file.utils';
@@ -49,6 +53,15 @@ export class MessageController {
       createMessageDto,
       attachments,
     );
+  }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all messages' })
+  @Get()
+  public async findAll(
+    @CurrentUser() userData: IUserData,
+    @Query() query: MessageListRequestDto,
+  ): Promise<MessageListResponseDto> {
+    return await this.messagesService.findAll(userData, query);
   }
 
   @ApiBearerAuth()

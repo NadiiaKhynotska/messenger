@@ -9,6 +9,7 @@ import { IUserData } from '../../auth/interfaces/user-data.interface';
 import { RefreshTokenRepository } from '../../repository/services/refresh-token.repository';
 import { UserRepository } from '../../repository/services/user.repository';
 import { UpdateUserDto } from '../models/dto/request/update-user.dto';
+import { UserListRequestDto } from '../models/dto/request/user-list.request.dto';
 import { UserListResponseDto } from '../models/dto/response/user.list.response.dto';
 import { UserResponseDto } from '../models/dto/response/user.response.dto';
 import { UserMapper } from './user.mapper';
@@ -25,9 +26,12 @@ export class UserService {
     return UserMapper.toResponseDto(entity);
   }
 
-  public async findAll(): Promise<UserListResponseDto> {
-    const users = await this.userRepository.find();
-    return UserMapper.toResponseDtoList(users);
+  public async findAll(
+    userData: IUserData,
+    query: UserListRequestDto,
+  ): Promise<UserListResponseDto> {
+    const [entities, total] = await this.userRepository.getAll(query);
+    return UserMapper.toResponseDtoList(entities, total, query);
   }
 
   public async updateMe(
