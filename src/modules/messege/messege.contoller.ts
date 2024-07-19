@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { photoConfig } from '../../constants/photo-config';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { IUserData } from '../auth/interfaces/user-data.interface';
 import { CreateMessageRequestDto } from './models/dto/request/create-message.request.dto';
+import { UpdateMessageDto } from './models/dto/request/update-message.request.dto';
 import { ResponseMessageDto } from './models/dto/response/response-message.dto';
 import { MessagesService } from './services/messege.service';
 import { imageFileFilter } from './utils/file.utils';
@@ -46,5 +49,40 @@ export class MessageController {
       createMessageDto,
       attachments,
     );
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update message' })
+  @Put('/:message_id')
+  @UseInterceptors(
+    FilesInterceptor('attachments', 10, {
+      fileFilter: imageFileFilter,
+      limits: {
+        fileSize: photoConfig.MAX_SIZE,
+      },
+    }),
+  )
+  public async update(
+    @CurrentUser() userData: IUserData,
+    @Body() dto: UpdateMessageDto,
+    @Param('message_id', ParseUUIDPipe) message_id: string,
+    @UploadedFiles() attachments: Express.Multer.File[],
+  ): Promise<ResponseMessageDto> {
+    return await this.messagesService.update(
+      userData,
+      message_id,
+      dto,
+      attachments,
+    );
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete message' })
+  @Delete('/:message_id')
+  public async delete(
+    @CurrentUser() userData: IUserData,
+    @Param('message_id', ParseUUIDPipe) message_id: string,
+  ): Promise<void> {
+    return await this.messagesService.deleteMessage(userData, message_id);
   }
 }

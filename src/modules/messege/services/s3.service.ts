@@ -1,11 +1,12 @@
 import * as path from 'node:path';
 
 import {
+  DeleteObjectCommand,
   ObjectCannedACL,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { v4 } from 'uuid';
 
@@ -39,6 +40,21 @@ export class S3Service {
       }),
     );
     return filePath;
+  }
+
+  async deleteFileFromS3(filePath: string): Promise<void> {
+    try {
+      await this.client.send(
+        new DeleteObjectCommand({
+          Bucket: s3Config.bucketName,
+          Key: filePath,
+        }),
+      );
+    } catch (error) {
+      throw new NotFoundException(
+        `Failed to delete file from S3: ${error.message}`,
+      );
+    }
   }
 
   private buildPath(fileName: string, userId: string): string {

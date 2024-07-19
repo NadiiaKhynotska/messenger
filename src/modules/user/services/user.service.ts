@@ -39,11 +39,6 @@ export class UserService {
     return UserMapper.toResponseDto(entity);
   }
 
-  // public async getPublicUser(userId: string): Promise<UserResponseDto> {
-  //   const entity = await this.userRepository.getById(userId);
-  //   return UserMapper.toResponseDto(entity);
-  // }
-
   private async findByIdOrThrow(userId: string): Promise<UserEntity> {
     const entity = await this.userRepository.findOneBy({ id: userId });
     if (!entity) {

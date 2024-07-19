@@ -17,7 +17,7 @@ export class MessageMapper {
       text: messageEntity.text,
       attachments: messageEntity?.attachments
         ? messageEntity.attachments.map(
-            (url) => `${s3Config.s3Endpoint}/${url}`,
+            (url) => `${s3Config.bucketPath}/${url}`,
           )
         : null,
       sender_id: messageEntity.sender_id,
