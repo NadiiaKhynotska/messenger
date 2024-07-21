@@ -24,7 +24,7 @@ export class MessagesService {
   public async create(
     userData: IUserData,
     recipient_id: string,
-    createMessageDto: CreateMessageRequestDto,
+    dto: CreateMessageRequestDto,
     attachments: Express.Multer.File[],
   ): Promise<ResponseMessageDto> {
     const sender = await this.userRepository.findByIdOrThrow(userData.userId);
@@ -38,7 +38,7 @@ export class MessagesService {
     const message = this.messageRepository.create({
       sender_id: sender.id,
       recipient_id: recipient.id,
-      text: createMessageDto.text,
+      text: dto.text,
       attachments: attachmentUrls,
     });
 

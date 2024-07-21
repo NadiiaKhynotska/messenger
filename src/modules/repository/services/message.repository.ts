@@ -2,6 +2,7 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 
 import { MessageEntity } from '../../../database/entities/message.entity';
+import { MessageListRequestDto } from '../../messege/models/dto/request/message-list.request.dto';
 
 @Injectable()
 export class MessageRepository extends Repository<MessageEntity> {
@@ -19,12 +20,12 @@ export class MessageRepository extends Repository<MessageEntity> {
 
   public async getAllForUser(
     userId: string,
-    query: any,
+    query: MessageListRequestDto,
   ): Promise<[MessageEntity[], number]> {
     const qb = this.createQueryBuilder('message')
       .where(
-        '(message.sender = :userId AND message.recipient = :recipient_id) OR (message.sender = :recipient_id AND message.recipient = :userId)',
-        { userId, recipient_id: query.recipient_id },
+        '(message.sender = :userId AND message.recipient = :recipientId) OR (message.sender = :recipientId AND message.recipient_id = :userId)',
+        { userId, recipientId: query.recipientId },
       )
       .orderBy('message.created', 'DESC')
       .take(query.limit)

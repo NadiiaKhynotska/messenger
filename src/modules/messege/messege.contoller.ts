@@ -43,19 +43,21 @@ export class MessageController {
   )
   public async create(
     @CurrentUser() userData: IUserData,
-    @Body() createMessageDto: CreateMessageRequestDto,
+    @Body() dto: CreateMessageRequestDto,
     @Param('recipient_id', ParseUUIDPipe) recipient_id: string,
     @UploadedFiles() attachments: Express.Multer.File[],
   ): Promise<ResponseMessageDto> {
     return await this.messagesService.create(
       userData,
       recipient_id,
-      createMessageDto,
+      dto,
       attachments,
     );
   }
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all messages' })
+  @ApiOperation({
+    summary: 'Get all messages from conversation with specific user',
+  })
   @Get()
   public async findAll(
     @CurrentUser() userData: IUserData,
