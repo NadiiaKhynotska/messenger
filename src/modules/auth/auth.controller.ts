@@ -1,6 +1,7 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { UserResponseDto } from '../user/models/dto/response/user.response.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { SkipAuth } from './decorators/skip-auth.decorator';
 import { SignInRequestDto } from './dto/request/sign-in.request.dto';
@@ -19,9 +20,7 @@ export class AuthController {
   @SkipAuth()
   @ApiOperation({ summary: 'Registration' })
   @Post('sign-up')
-  public async signUp(
-    @Body() dto: SignUpRequestDto,
-  ): Promise<AuthUserResponseDto> {
+  public async signUp(@Body() dto: SignUpRequestDto): Promise<UserResponseDto> {
     return await this.authService.signUp(dto);
   }
 

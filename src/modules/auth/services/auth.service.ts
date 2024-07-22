@@ -3,6 +3,8 @@ import * as bcrypt from 'bcrypt';
 
 import { RefreshTokenRepository } from '../../repository/services/refresh-token.repository';
 import { UserRepository } from '../../repository/services/user.repository';
+import { UserResponseDto } from '../../user/models/dto/response/user.response.dto';
+import { UserMapper } from '../../user/services/user.mapper';
 import { UserService } from '../../user/services/user.service';
 import { SignInRequestDto } from '../dto/request/sign-in.request.dto';
 import { SignUpRequestDto } from '../dto/request/sign-up.request.dto';
@@ -23,7 +25,7 @@ export class AuthService {
     private readonly refreshRepository: RefreshTokenRepository,
   ) {}
 
-  public async signUp(dto: SignUpRequestDto): Promise<AuthUserResponseDto> {
+  public async signUp(dto: SignUpRequestDto): Promise<UserResponseDto> {
     await this.userService.isEmailUniqOrThrow(dto.email);
 
     const password = await bcrypt.hash(dto.password, 10);
@@ -32,16 +34,16 @@ export class AuthService {
       this.userRepository.create({ ...dto, password }),
     );
 
-    const tokens = await this.tokenService.generateAuthTokens({
-      userId: user.id,
-    });
+    // const tokens = await this.tokenService.generateAuthTokens({
+    //   userId: user.id,
+    // });
+    //
+    // await Promise.all([
+    //   this.refreshRepository.saveToken(user.id, tokens.refreshToken),
+    //   this.authCacheService.saveToken(user.id, tokens.accessToken),
+    // ]);
 
-    await Promise.all([
-      this.refreshRepository.saveToken(user.id, tokens.refreshToken),
-      this.authCacheService.saveToken(user.id, tokens.accessToken),
-    ]);
-
-    return AuthMapper.toResponseDto(user, tokens);
+    return UserMapper.toResponseDto(user);
   }
 
   public async signIn(dto: SignInRequestDto): Promise<AuthUserResponseDto> {
