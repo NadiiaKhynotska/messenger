@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
+import { ReferrerPolicyInterceptor } from '../common/interseptors/referrer-policy-interseptor';
 import configuration from '../configs/config';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
@@ -25,6 +27,11 @@ import { UserModule } from './user/user.module';
     }),
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ReferrerPolicyInterceptor,
+    },
+  ],
 })
 export class AppModule {}
