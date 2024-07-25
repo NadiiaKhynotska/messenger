@@ -43,6 +43,14 @@ export class UserController {
   ): Promise<UserResponseDto> {
     return await this.userService.updateMe(userData, dto);
   }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get your own account' })
+  @Get('me')
+  public async FindMe(
+    @CurrentUser() userData: IUserData,
+  ): Promise<UserResponseDto> {
+    return await this.userService.findMe(userData);
+  }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth()

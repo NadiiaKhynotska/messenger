@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { UserResponseDto } from '../user/models/dto/response/user.response.dto';
@@ -8,7 +8,6 @@ import { SignInRequestDto } from './dto/request/sign-in.request.dto';
 import { SignUpRequestDto } from './dto/request/sign-up.request.dto';
 import { AuthUserResponseDto } from './dto/response/auth-user.response.dto';
 import { TokenResponseDto } from './dto/response/token.response.dto';
-import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { IUserData } from './interfaces/user-data.interface';
 import { AuthService } from './services/auth.service';
 
@@ -40,8 +39,7 @@ export class AuthController {
     await this.authService.logout(userData);
   }
 
-  @SkipAuth()
-  @UseGuards(JwtRefreshGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update token pair' })
   @Post('refresh')
   public async updateRefreshToken(
