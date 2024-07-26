@@ -29,11 +29,14 @@ export class MessagesService {
   ): Promise<ResponseMessageDto> {
     const sender = await this.userRepository.findByIdOrThrow(userData.userId);
     const recipient = await this.userRepository.findByIdOrThrow(recipient_id);
-    const attachmentUrls = await Promise.all(
-      attachments.map((file) =>
-        this.s3Service.uploadFileToS3(file, userData.userId),
-      ),
-    );
+    let attachmentUrls: string[];
+    if (attachments) {
+      attachmentUrls = await Promise.all(
+        attachments?.map((file) =>
+          this.s3Service.uploadFileToS3(file, userData.userId),
+        ),
+      );
+    } else attachmentUrls = [];
 
     const message = this.messageRepository.create({
       sender_id: sender.id,
